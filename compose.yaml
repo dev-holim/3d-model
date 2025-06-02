@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  3d_model_viewer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    container_name: 3d_model_viewer
+    ports:
+      - "32810:3000"
+    volumes:
+      - ./:/data/app
+    environment:
+      - NODE_ENV=production

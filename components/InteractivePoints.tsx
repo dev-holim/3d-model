@@ -10,6 +10,8 @@ interface Point {
   position: [number, number, number]
   label: string
   color?: string
+  lookAt: [number, number, number]
+  cameraDistance: number
 }
 
 interface InteractivePointsProps {
@@ -17,16 +19,16 @@ interface InteractivePointsProps {
   onPointClick: (point: Point) => void
 }
 
-export default function InteractivePoints({ points, onPointClick }: InteractivePointsProps) {
+export default ({points, onPointClick}: InteractivePointsProps) => {
   const [hoveredPoint, setHoveredPoint] = useState<string | null>(null)
   const pointRefs = useRef<{ [key: string]: THREE.Mesh }>({})
-  
+
   useFrame(() => {
     // Animate points on hover
     Object.entries(pointRefs.current).forEach(([id, mesh]) => {
       if (mesh) {
         const isHovered = hoveredPoint === id
-        const targetScale = isHovered ? 1.5 : 1
+        const targetScale = isHovered ? 1.3 : 1
         mesh.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1)
       }
     })
@@ -41,7 +43,7 @@ export default function InteractivePoints({ points, onPointClick }: InteractiveP
             ref={(ref) => {
               if (ref) pointRefs.current[point.id] = ref
             }}
-            args={[0.2, 16, 16]}
+            args={[0.02, 16, 16]}
             onClick={(e) => {
               console.log('Sphere clicked:', point.id)
               e.stopPropagation()
@@ -59,16 +61,15 @@ export default function InteractivePoints({ points, onPointClick }: InteractiveP
             }}
           >
             <meshStandardMaterial
-              color={point.color || '#ff6b6b'}
-              emissive={point.color || '#ff6b6b'}
-              emissiveIntensity={hoveredPoint === point.id ? 0.5 : 0.2}
+              color={point.color || '#f37321'}
+              emissive={point.color || '#f37321'}
+              emissiveIntensity={hoveredPoint === point.id ? 1.5 : 0.2}
               transparent
               opacity={0.9}
             />
           </Sphere>
-          
-          {/* Label text */}
-          <Text
+
+          {/* <Text
             position={[0, 0.3, 0]}
             fontSize={0.15}
             color="white"
@@ -78,10 +79,9 @@ export default function InteractivePoints({ points, onPointClick }: InteractiveP
             outlineColor="#000000"
           >
             {point.label}
-          </Text>
-          
-          {/* Animated ring effect */}
-          <Ring point={point} isHovered={hoveredPoint === point.id} />
+          </Text> */}
+
+          {/* <Ring point={point} isHovered={hoveredPoint === point.id} /> */}
         </group>
       ))}
     </>
@@ -90,7 +90,7 @@ export default function InteractivePoints({ points, onPointClick }: InteractiveP
 
 function Ring({ point, isHovered }: { point: Point; isHovered: boolean }) {
   const ringRef = useRef<THREE.Mesh>(null)
-  
+
   useFrame(({ clock }) => {
     if (ringRef.current) {
       ringRef.current.rotation.z = clock.elapsedTime
@@ -98,7 +98,7 @@ function Ring({ point, isHovered }: { point: Point; isHovered: boolean }) {
       ringRef.current.scale.setScalar(scale)
     }
   })
-  
+
   return (
     <mesh ref={ringRef}>
       <ringGeometry args={[0.15, 0.2, 32]} />
@@ -110,4 +110,4 @@ function Ring({ point, isHovered }: { point: Point; isHovered: boolean }) {
       />
     </mesh>
   )
-} 
+}
